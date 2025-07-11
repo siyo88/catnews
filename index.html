@@ -1,50 +1,129 @@
-<!DOCTYPE html><html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>나만의 고양이 만들기</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; background: #f9f9f9; margin: 0; padding: 20px; }
-    h1 { margin-bottom: 20px; }
-    #cat-display { width: 200px; height: 200px; margin: 0 auto 20px; background-color: #ccc; border-radius: 100px; position: relative; }
-    .eye { width: 30px; height: 30px; background: white; border-radius: 50%; position: absolute; top: 60px; }
-    .eye.left { left: 40px; }
-    .eye.right { right: 40px; }
-    .color-picker, .ear-picker { margin: 10px; }
-  </style>
-</head>
-<body>
-  <h1>나만의 고양이 만들기</h1>
-  <div id="cat-display">
-    <div class="eye left"></div>
-    <div class="eye right"></div>
-  </div>
-  <div>
-    <label>고양이 색상: <input type="color" id="colorInput" class="color-picker" /></label>
-    <label>
-      귀 모양:
-      <select id="earInput" class="ear-picker">
-        <option value="round">둥근 귀</option>
-        <option value="pointy">뾰족 귀</option>
-      </select>
-    </label>
-  </div>
-  <script>
-    const catDisplay = document.getElementById('cat-display');
-    const colorInput = document.getElementById('colorInput');
-    const earInput = document.getElementById('earInput');colorInput.addEventListener('input', () => {
-  catDisplay.style.backgroundColor = colorInput.value;
-});
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
-earInput.addEventListener('change', () => {
-  const earType = earInput.value;
-  if (earType === 'pointy') {
-    catDisplay.style.borderRadius = '100px 100px 30px 30px';
-  } else {
-    catDisplay.style.borderRadius = '100px';
+const questions = [
+  {
+    question: "Where does your cat spend most of its time?",
+    options: ["By the window", "On the bed", "Near the kitchen"],
+  },
+  {
+    question: "What is your cat's favorite toy?",
+    options: ["Laser pointer", "Feather toy", "Box"],
+  },
+  {
+    question: "What is your cat's personality like?",
+    options: ["Active and adventurous", "Calm and observant", "Playful and curious"],
+  },
+  {
+    question: "What does your cat do when guests visit?",
+    options: ["Hides", "Approaches them", "Watches from a distance"],
+  },
+  {
+    question: "When is your cat most active during the day?",
+    options: ["Early morning", "Midday", "Late night"],
+  },
+  {
+    question: "How would you describe your cat's eating habits?",
+    options: ["Eats anything", "Picky eater", "Loves trying new foods"],
+  },
+  {
+    question: "How does your cat prefer to play?",
+    options: ["Running together", "Sitting calmly while being petted", "Playing with toys"],
+  },
+  {
+    question: "What kind of sound does your cat react to the most?",
+    options: ["Mechanical sounds", "Human voices", "Music"],
+  },
+  {
+    question: "Where does your cat like to sleep?",
+    options: ["High shelves", "Next to people", "In dark and tight spaces"],
+  },
+  {
+    question: "What's something your cat is really good at?",
+    options: ["Jumping high", "Looking great in photos", "Bringing unusual things"],
+  },
+];
+
+const results = [
+  {
+    title: "Astronaut Cat",
+    keywords: ["window", "adventurous", "laser", "high", "explore"],
+    image: "/images/astro_cat.png",
+  },
+  {
+    title: "Artist Cat",
+    keywords: ["calm", "observant", "photo", "next to people", "music"],
+    image: "/images/artist_cat.png",
+  },
+  {
+    title: "Chef Cat",
+    keywords: ["kitchen", "smell", "new foods", "picky"],
+    image: "/images/chef_cat.png",
+  },
+  {
+    title: "Rockstar Cat",
+    keywords: ["music", "night", "playful", "human voices"],
+    image: "/images/rockstar_cat.png",
+  },
+];
+
+export default function CatCareerQuiz() {
+  const [current, setCurrent] = useState(0);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [result, setResult] = useState<null | typeof results[0]>(null);
+
+  function handleAnswer(option: string) {
+    const newAnswers = [...answers, option];
+    if (current + 1 === questions.length) {
+      const scoreMap = new Map();
+      for (const res of results) scoreMap.set(res.title, 0);
+      for (const res of results) {
+        for (const ans of newAnswers) {
+          for (const keyword of res.keywords) {
+            if (ans.toLowerCase().includes(keyword)) {
+              scoreMap.set(res.title, scoreMap.get(res.title) + 1);
+            }
+          }
+        }
+      }
+      const sorted = results.sort(
+        (a, b) => (scoreMap.get(b.title) ?? 0) - (scoreMap.get(a.title) ?? 0)
+      );
+      setResult(sorted[0]);
+    } else {
+      setAnswers(newAnswers);
+      setCurrent(current + 1);
+    }
   }
-});
 
-  </script>
-</body>
-</html>
+  return (
+    <div className="max-w-xl mx-auto p-4 text-center">
+      {!result ? (
+        <Card>
+          <CardContent className="p-4 space-y-4">
+            <h2 className="text-xl font-bold">{questions[current].question}</h2>
+            {questions[current].options.map((option, i) => (
+              <Button
+                key={i}
+                onClick={() => handleAnswer(option)}
+                className="w-full"
+              >
+                {option}
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-4 space-y-4">
+            <h2 className="text-2xl font-bold">
+              In the future, your cat will be a <span className="text-primary">{result.title}</span>!
+            </h2>
+            <img src={result.image} alt={result.title} className="mx-auto w-64" />
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
