@@ -44,4 +44,84 @@
     { question: "What does your cat do when guests visit?", options: ["Hides", "Approaches them", "Watches from a distance"] },
     { question: "When is your cat most active during the day?", options: ["Early morning", "Midday", "Late night"] },
     { question: "How would you describe your cat's eating habits?", options: ["Eats anything", "Picky eater", "Loves trying new foods"] },
-    { question: "How does your cat prefer to play?", options:
+    { question: "How does your cat prefer to play?", options: ["Running together", "Sitting calmly while being petted", "Playing with toys"] },
+    { question: "What kind of sound does your cat react to the most?", options: ["Mechanical sounds", "Human voices", "Music"] },
+    { question: "Where does your cat like to sleep?", options: ["High shelves", "Next to people", "In dark and tight spaces"] },
+    { question: "What's something your cat is really good at?", options: ["Jumping high", "Looking great in photos", "Bringing unusual things"] },
+  ];
+
+  const results = [
+    {
+      title: "Astronaut Cat",
+      keywords: ["window", "adventurous", "laser", "high", "explore"],
+      image: "https://example.com/astro_cat.png",
+    },
+    {
+      title: "Artist Cat",
+      keywords: ["calm", "observant", "photo", "next to people", "music"],
+      image: "https://example.com/artist_cat.png",
+    },
+    {
+      title: "Chef Cat",
+      keywords: ["kitchen", "smell", "new foods", "picky"],
+      image: "https://example.com/chef_cat.png",
+    },
+    {
+      title: "Rockstar Cat",
+      keywords: ["music", "night", "playful", "human voices"],
+      image: "https://example.com/rockstar_cat.png",
+    },
+  ];
+
+  let current = 0;
+  let answers = [];
+
+  function showQuestion() {
+    const q = questions[current];
+    document.getElementById('question-title').textContent = q.question;
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '';
+    q.options.forEach(option => {
+      const btn = document.createElement('button');
+      btn.textContent = option;
+      btn.onclick = () => handleAnswer(option);
+      optionsDiv.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(option) {
+    answers.push(option.toLowerCase());
+    current++;
+    if (current >= questions.length) {
+      showResult();
+    } else {
+      showQuestion();
+    }
+  }
+
+  function showResult() {
+    const scoreMap = {};
+    results.forEach(res => scoreMap[res.title] = 0);
+    results.forEach(res => {
+      res.keywords.forEach(keyword => {
+        answers.forEach(ans => {
+          if (ans.includes(keyword)) {
+            scoreMap[res.title]++;
+          }
+        });
+      });
+    });
+
+    const best = results.sort((a, b) => scoreMap[b.title] - scoreMap[a.title])[0];
+    const container = document.getElementById('quiz-container');
+    container.innerHTML = `
+      <h2>In the future, your cat will be a <span style="color:#5a67d8">${best.title}</span>!</h2>
+      <img src="${best.image}" alt="${best.title}" />
+    `;
+  }
+
+  showQuestion();
+</script>
+
+</body>
+</html>
